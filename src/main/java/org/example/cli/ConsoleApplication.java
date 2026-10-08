@@ -33,18 +33,10 @@ public class ConsoleApplication {
             Scanner scanner
     ) {
         this.scanner = scanner;
-
-        this.selectRepository =
-                new SelectRepository(connection);
-
-        this.updateRepository =
-                new UpdateRepository(connection);
-
-        this.insertRepository =
-                new InsertRepository(connection);
-
-        this.orderService =
-                new OrderService(connection);
+        this.selectRepository = new SelectRepository(connection);
+        this.updateRepository = new UpdateRepository(connection);
+        this.insertRepository = new InsertRepository(connection);
+        this.orderService = new OrderService(connection);
     }
 
     public void run() {
@@ -54,8 +46,7 @@ public class ConsoleApplication {
             printMenu();
 
             System.out.print("Choose an option: ");
-            String choice =
-                    scanner.nextLine().trim();
+            String choice = scanner.nextLine().trim();
 
             switch (choice) {
                 case "1" -> viewTable();
@@ -174,9 +165,10 @@ public class ConsoleApplication {
             return;
         }
 
-        Integer count = readPositiveInt(
-                "Number of filters: "
-        );
+        Integer count =
+                readPositiveInt(
+                        "Number of filters: "
+                );
 
         if (count == null) {
             return;
@@ -186,6 +178,7 @@ public class ConsoleApplication {
                 new ArrayList<>();
 
         for (int i = 1; i <= count; i++) {
+            System.out.println();
             System.out.println(
                     "Filter " + i + ":"
             );
@@ -240,17 +233,19 @@ public class ConsoleApplication {
             return;
         }
 
-        Long id = readPositiveLong(
-                "Record ID: "
-        );
+        Long id =
+                readPositiveLong(
+                        "Record ID: "
+                );
 
         if (id == null) {
             return;
         }
 
-        Integer count = readPositiveInt(
-                "Number of columns to update: "
-        );
+        Integer count =
+                readPositiveInt(
+                        "Number of columns to update: "
+                );
 
         if (count == null) {
             return;
@@ -258,9 +253,7 @@ public class ConsoleApplication {
 
         if (count >
                 SqlIdentifierValidator
-                        .getUpdatableColumns(
-                                tableName
-                        )
+                        .getUpdatableColumns(tableName)
                         .size()) {
 
             AppLogger.error(
@@ -277,14 +270,13 @@ public class ConsoleApplication {
                 new HashSet<>();
 
         for (int i = 1; i <= count; i++) {
+            System.out.println();
             System.out.println(
                     "Update " + i + ":"
             );
 
             String column =
-                    readUpdatableColumn(
-                            tableName
-                    );
+                    readUpdatableColumn(tableName);
 
             if (column == null) {
                 return;
@@ -349,9 +341,7 @@ public class ConsoleApplication {
         );
 
         String updateColumn =
-                readUpdatableColumn(
-                        tableName
-                );
+                readUpdatableColumn(tableName);
 
         if (updateColumn == null) {
             return;
@@ -366,17 +356,16 @@ public class ConsoleApplication {
         );
 
         String filterColumn =
-                readAllowedColumn(
-                        tableName
-                );
+                readAllowedColumn(tableName);
 
         if (filterColumn == null) {
             return;
         }
 
-        Integer count = readPositiveInt(
-                "Number of filter values: "
-        );
+        Integer count =
+                readPositiveInt(
+                        "Number of filter values: "
+                );
 
         if (count == null) {
             return;
@@ -431,9 +420,10 @@ public class ConsoleApplication {
             return;
         }
 
-        Integer count = readPositiveInt(
-                "Number of columns to insert: "
-        );
+        Integer count =
+                readPositiveInt(
+                        "Number of columns to insert: "
+                );
 
         if (count == null) {
             return;
@@ -441,9 +431,7 @@ public class ConsoleApplication {
 
         if (count >
                 SqlIdentifierValidator
-                        .getInsertableColumns(
-                                tableName
-                        )
+                        .getInsertableColumns(tableName)
                         .size()) {
 
             AppLogger.error(
@@ -460,14 +448,13 @@ public class ConsoleApplication {
                 new HashSet<>();
 
         for (int i = 1; i <= count; i++) {
+            System.out.println();
             System.out.println(
                     "Column " + i + ":"
             );
 
             String column =
-                    readInsertableColumn(
-                            tableName
-                    );
+                    readInsertableColumn(tableName);
 
             if (column == null) {
                 return;
@@ -568,9 +555,7 @@ public class ConsoleApplication {
 
         if (columnCount >
                 SqlIdentifierValidator
-                        .getInsertableColumns(
-                                tableName
-                        )
+                        .getInsertableColumns(tableName)
                         .size()) {
 
             AppLogger.error(
@@ -579,6 +564,9 @@ public class ConsoleApplication {
 
             return;
         }
+
+        System.out.println();
+        printInsertableColumns(tableName);
 
         List<String> columns =
                 new ArrayList<>();
@@ -590,16 +578,23 @@ public class ConsoleApplication {
              i <= columnCount;
              i++) {
 
-            System.out.println(
-                    "Column " + i + ":"
+            System.out.print(
+                    "Column " + i + ": "
             );
 
             String column =
-                    readInsertableColumn(
-                            tableName
-                    );
+                    scanner.nextLine().trim();
 
-            if (column == null) {
+            if (!SqlIdentifierValidator
+                    .isInsertableColumn(
+                            tableName,
+                            column
+                    )) {
+
+                AppLogger.error(
+                        "Unknown or protected column."
+                );
+
                 return;
             }
 
@@ -630,6 +625,7 @@ public class ConsoleApplication {
              row <= rowCount;
              row++) {
 
+            System.out.println();
             System.out.println(
                     "Row " + row + ":"
             );
@@ -772,6 +768,7 @@ public class ConsoleApplication {
              i <= itemCount;
              i++) {
 
+            System.out.println();
             System.out.println(
                     "Item " + i + ":"
             );
@@ -999,9 +996,7 @@ public class ConsoleApplication {
         );
 
         SqlIdentifierValidator
-                .getAllowedColumns(
-                        tableName
-                )
+                .getAllowedColumns(tableName)
                 .forEach(column ->
                         System.out.println(
                                 "- " + column
@@ -1017,9 +1012,7 @@ public class ConsoleApplication {
         );
 
         SqlIdentifierValidator
-                .getUpdatableColumns(
-                        tableName
-                )
+                .getUpdatableColumns(tableName)
                 .forEach(column ->
                         System.out.println(
                                 "- " + column
@@ -1035,9 +1028,7 @@ public class ConsoleApplication {
         );
 
         SqlIdentifierValidator
-                .getInsertableColumns(
-                        tableName
-                )
+                .getInsertableColumns(tableName)
                 .forEach(column ->
                         System.out.println(
                                 "- " + column

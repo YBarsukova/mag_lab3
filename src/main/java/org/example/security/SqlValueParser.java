@@ -16,8 +16,14 @@ public class SqlValueParser {
         String key = tableName + "." + columnName;
 
         return switch (key) {
-            case "books.author_id",
+
+            case "authors.id",
+                 "books.id",
+                 "books.author_id",
+                 "customers.id",
+                 "orders.id",
                  "orders.customer_id",
+                 "order_items.id",
                  "order_items.order_id",
                  "order_items.book_id" ->
                     Long.parseLong(value);
