@@ -8,8 +8,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
+@SuppressWarnings("SqlResolve")
 public class OrderService {
+
+    private static final Set<String> ALLOWED_STATUSES = Set.of(
+            "NEW",
+            "PAID",
+            "SHIPPED",
+            "COMPLETED",
+            "CANCELLED"
+    );
 
     private final Connection connection;
 
@@ -29,7 +40,8 @@ public class OrderService {
         connection.setAutoCommit(false);
 
         try {
-            long orderId = insertOrder(order);
+            long orderId =
+                    insertOrder(order);
 
             insertItems(
                     orderId,
@@ -109,6 +121,9 @@ public class OrderService {
                 RETURNING id
                 """;
 
+        String status =
+                normalizeStatus(order.status());
+
         try (PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -119,7 +134,7 @@ public class OrderService {
 
             statement.setString(
                     2,
-                    order.status()
+                    status
             );
 
             try (ResultSet resultSet =
@@ -186,17 +201,24 @@ public class OrderService {
     private void validateOrder(
             OrderInput order
     ) {
+        if (order == null) {
+            throw new IllegalArgumentException(
+                    "Order is required."
+            );
+        }
+
         if (order.customerId() <= 0) {
             throw new IllegalArgumentException(
                     "Invalid customer ID."
             );
         }
 
-        if (order.status() == null
-                || order.status().isBlank()) {
+        String status =
+                normalizeStatus(order.status());
 
+        if (!ALLOWED_STATUSES.contains(status)) {
             throw new IllegalArgumentException(
-                    "Order status is required."
+                    "Invalid order status."
             );
         }
 
@@ -220,6 +242,18 @@ public class OrderService {
                 );
             }
         }
+    }
+
+    private String normalizeStatus(
+            String status
+    ) {
+        if (status == null) {
+            return "";
+        }
+
+        return status
+                .replaceAll("[^A-Za-z]", "")
+                .toUpperCase(Locale.ROOT);
     }
 
     private void rollback(
